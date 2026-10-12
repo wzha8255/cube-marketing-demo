@@ -1,6 +1,12 @@
 cubes:
   - name: impressions_hourly
-    sql_table: marketing_raw.fact_impressions_hourly
+    # impression_date is a DATE in BigQuery; expose it as a TIMESTAMP so Cube's
+    # time-zone conversion and pre-aggregation partition-range queries work.
+    sql: |
+      SELECT * EXCEPT (impression_date),
+             impression_date AS impression_day,
+             TIMESTAMP(impression_date) AS impression_date
+      FROM marketing_raw.fact_impressions_hourly
     description: >
       Synthetic ad impressions at hourly grain across campaign, channel,
       placement, country and device. ~52M rows over 2022-2023. Used to
@@ -17,7 +23,7 @@ cubes:
         sql: >
           FARM_FINGERPRINT(CONCAT(
             {CUBE}.campaign_id, '|', {CUBE}.channel, '|', {CUBE}.placement_type,
-            '|', CAST({CUBE}.impression_date AS STRING),
+            '|', CAST({CUBE}.impression_day AS STRING),
             '|', CAST({CUBE}.impression_hour AS STRING),
             '|', {CUBE}.country, '|', {CUBE}.device
           ))
@@ -50,11 +56,11 @@ cubes:
         type: number
 
       - name: impression_date
-        sql: "TIMESTAMP({CUBE}.impression_date)"
+        sql: impression_date
         type: time
 
       - name: impression_timestamp
-        sql: "TIMESTAMP(DATETIME(impression_date, TIME(impression_hour, 0, 0)))"
+        sql: "TIMESTAMP(DATETIME(impression_day, TIME(impression_hour, 0, 0)))"
         type: time
         description: Full hour-grain timestamp derived from impression_date + impression_hour.
 
