@@ -1,0 +1,7 @@
+views:
+  - name: campaigns_view
+    title: Campaigns
+
+    cubes:
+      - join_path: campaigns
+        includes: "*"

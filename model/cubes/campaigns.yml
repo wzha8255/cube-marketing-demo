@@ -1,0 +1,61 @@
+cubes:
+  - name: campaigns
+    sql_table: dbt_campaign_analytics_marts.dim_campaigns
+    public: false
+
+    dimensions:
+      - name: campaign_id
+        sql: campaign_id
+        type: string
+        primary_key: true
+
+      - name: campaign_name
+        sql: campaign_name
+        type: string
+
+      - name: campaign_type
+        sql: campaign_type
+        type: string
+
+      - name: category
+        sql: category
+        type: string
+
+      - name: campaign_start_date
+        sql: campaign_start_date
+        type: time
+
+      - name: campaign_end_date
+        sql: campaign_end_date
+        type: time
+
+      - name: pre_period_start_date
+        sql: pre_period_start_date
+        type: time
+
+      - name: pre_period_end_date
+        sql: pre_period_end_date
+        type: time
+
+      - name: post_period_start_date
+        sql: post_period_start_date
+        type: time
+
+      - name: post_period_end_date
+        sql: post_period_end_date
+        type: time
+
+      - name: campaign_duration_days
+        sql: campaign_duration_days
+        type: number
+
+    measures:
+      - name: count
+        type: count
+        title: Campaigns
+        drill_members: [campaign_id, campaign_name, campaign_type, category, campaign_start_date]
+
+      - name: avg_campaign_duration_days
+        sql: campaign_duration_days
+        type: avg
+        title: Avg Campaign Duration (Days)
