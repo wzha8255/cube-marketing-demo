@@ -184,3 +184,33 @@ cubes:
         sql: "{reactive_sales} / NULLIF({sum_of_segment_sales}, 0)"
         type: number
         format: percent
+
+    pre_aggregations:
+      - name: by_campaign_period
+        measures:
+          - CUBE.total_customers
+          - CUBE.total_orders
+          - CUBE.total_units
+          - CUBE.total_sales
+          - CUBE.sum_of_segment_sales
+          - CUBE.ntb_customers
+          - CUBE.ntb_units
+          - CUBE.ntb_sales
+          - CUBE.nts_customers
+          - CUBE.nts_units
+          - CUBE.nts_sales
+          - CUBE.repeat_customers
+          - CUBE.repeat_units
+          - CUBE.repeat_sales
+          - CUBE.reactive_customers
+          - CUBE.reactive_units
+          - CUBE.reactive_sales
+          - CUBE.other_customers
+          - CUBE.other_sales
+        dimensions:
+          - CUBE.period_type
+          - campaigns.campaign_name
+          - campaigns.campaign_type
+          - campaigns.category
+        refresh_key:
+          every: 1 hour
