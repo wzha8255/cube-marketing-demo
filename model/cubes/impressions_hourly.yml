@@ -50,7 +50,7 @@ cubes:
         type: number
 
       - name: impression_date
-        sql: impression_date
+        sql: "TIMESTAMP({CUBE}.impression_date)"
         type: time
 
       - name: impression_timestamp
