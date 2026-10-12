@@ -13,6 +13,18 @@ cubes:
         relationship: many_to_one
 
     dimensions:
+      - name: id
+        sql: >
+          FARM_FINGERPRINT(CONCAT(
+            {CUBE}.campaign_id, '|', {CUBE}.channel, '|', {CUBE}.placement_type,
+            '|', CAST({CUBE}.impression_date AS STRING),
+            '|', CAST({CUBE}.impression_hour AS STRING),
+            '|', {CUBE}.country, '|', {CUBE}.device
+          ))
+        type: number
+        primary_key: true
+        public: false
+
       - name: campaign_id
         sql: campaign_id
         type: string
