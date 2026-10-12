@@ -1,0 +1,21 @@
+views:
+  - name: campaign_sales_metrics_view
+    title: Campaign Sales Metrics
+
+    cubes:
+      - join_path: campaign_sales_metrics
+        includes: "*"
+
+      - join_path: campaign_sales_metrics.campaigns
+        prefix: true
+        includes:
+          - campaign_name
+          - campaign_type
+          - category
+          - campaign_start_date
+          - campaign_end_date
+          - pre_period_start_date
+          - pre_period_end_date
+          - post_period_start_date
+          - post_period_end_date
+          - campaign_duration_days

@@ -1,0 +1,62 @@
+cubes:
+  - name: campaign_sales_metrics
+    sql_table: dbt_campaign_analytics_marts.fct_campaign_sales_metrics
+    public: false
+
+    joins:
+      - name: campaigns
+        sql: "{CUBE}.campaign_id = {campaigns}.campaign_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: id
+        sql: "CONCAT({CUBE}.campaign_id, '-', {CUBE}.period_type, '-', {CUBE}.customer_type)"
+        type: string
+        primary_key: true
+
+      - name: campaign_id
+        sql: campaign_id
+        type: string
+
+      - name: period_type
+        sql: period_type
+        type: string
+        description: Period relative to the campaign - pre_period, campaign_period or post_period.
+
+      - name: customer_type
+        sql: customer_type
+        type: string
+        description: Customer segment - new_to_brand, new_to_sku, repeat, reactive or other.
+
+    measures:
+      - name: orders
+        sql: orders
+        type: sum
+        drill_members: [id, campaign_id, period_type, customer_type]
+
+      - name: customers
+        sql: customers
+        type: sum
+        description: Customers summed across the rows in scope, so a customer in several rows is counted more than once.
+        drill_members: [id, campaign_id, period_type, customer_type]
+
+      - name: units
+        sql: units
+        type: sum
+        drill_members: [id, campaign_id, period_type, customer_type]
+
+      - name: sales
+        sql: sales
+        type: sum
+        format: currency
+        drill_members: [id, campaign_id, period_type, customer_type]
+
+      - name: avg_order_value
+        sql: "{CUBE.sales} / NULLIF({CUBE.orders}, 0)"
+        type: number
+        format: currency
+
+      - name: avg_revenue_per_customer
+        sql: "{CUBE.sales} / NULLIF({CUBE.customers}, 0)"
+        type: number
+        format: currency

@@ -1,0 +1,186 @@
+cubes:
+  - name: campaign_customer_metrics
+    sql_table: dbt_campaign_analytics_marts.fct_campaign_customer_metrics
+    public: false
+
+    joins:
+      - name: campaigns
+        sql: "{CUBE}.campaign_id = {campaigns}.campaign_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: id
+        sql: "CONCAT({CUBE}.campaign_id, '-', {CUBE}.period_type)"
+        type: string
+        primary_key: true
+
+      - name: campaign_id
+        sql: campaign_id
+        type: string
+
+      - name: period_type
+        sql: period_type
+        type: string
+        description: Period relative to the campaign - pre_period, campaign_period or post_period.
+
+    measures:
+      # Totals. Customer counts are summed across the rows in scope, so a customer
+      # active in several periods or campaigns is counted once per row.
+      - name: total_customers
+        sql: total_customers
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: total_orders
+        sql: total_orders
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: total_units
+        sql: total_units
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: total_sales
+        sql: total_sales
+        type: sum
+        format: currency
+        drill_members: [id, campaign_id, period_type]
+
+      - name: sum_of_segment_sales
+        sql: sum_of_segment_sales
+        type: sum
+        format: currency
+        drill_members: [id, campaign_id, period_type]
+
+      # New to brand
+      - name: ntb_customers
+        sql: ntb_customers
+        type: sum
+        title: New-to-Brand Customers
+        drill_members: [id, campaign_id, period_type]
+
+      - name: ntb_units
+        sql: ntb_units
+        type: sum
+        title: New-to-Brand Units
+        drill_members: [id, campaign_id, period_type]
+
+      - name: ntb_sales
+        sql: ntb_sales
+        type: sum
+        format: currency
+        title: New-to-Brand Sales
+        drill_members: [id, campaign_id, period_type]
+
+      # New to SKU
+      - name: nts_customers
+        sql: nts_customers
+        type: sum
+        title: New-to-SKU Customers
+        drill_members: [id, campaign_id, period_type]
+
+      - name: nts_units
+        sql: nts_units
+        type: sum
+        title: New-to-SKU Units
+        drill_members: [id, campaign_id, period_type]
+
+      - name: nts_sales
+        sql: nts_sales
+        type: sum
+        format: currency
+        title: New-to-SKU Sales
+        drill_members: [id, campaign_id, period_type]
+
+      # Repeat
+      - name: repeat_customers
+        sql: repeat_customers
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: repeat_units
+        sql: repeat_units
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: repeat_sales
+        sql: repeat_sales
+        type: sum
+        format: currency
+        drill_members: [id, campaign_id, period_type]
+
+      # Reactive
+      - name: reactive_customers
+        sql: reactive_customers
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: reactive_units
+        sql: reactive_units
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: reactive_sales
+        sql: reactive_sales
+        type: sum
+        format: currency
+        drill_members: [id, campaign_id, period_type]
+
+      # Other
+      - name: other_customers
+        sql: other_customers
+        type: sum
+        drill_members: [id, campaign_id, period_type]
+
+      - name: other_sales
+        sql: other_sales
+        type: sum
+        format: currency
+        drill_members: [id, campaign_id, period_type]
+
+      # Customer shares (segment customers / total customers)
+      - name: ntb_customer_share
+        sql: "{ntb_customers} / NULLIF({total_customers}, 0)"
+        type: number
+        format: percent
+        title: New-to-Brand Customer Share
+
+      - name: nts_customer_share
+        sql: "{nts_customers} / NULLIF({total_customers}, 0)"
+        type: number
+        format: percent
+        title: New-to-SKU Customer Share
+
+      - name: repeat_customer_share
+        sql: "{repeat_customers} / NULLIF({total_customers}, 0)"
+        type: number
+        format: percent
+
+      - name: reactive_customer_share
+        sql: "{reactive_customers} / NULLIF({total_customers}, 0)"
+        type: number
+        format: percent
+
+      # Sales shares (segment sales / sum of segment sales)
+      - name: ntb_sales_share
+        sql: "{ntb_sales} / NULLIF({sum_of_segment_sales}, 0)"
+        type: number
+        format: percent
+        title: New-to-Brand Sales Share
+
+      - name: nts_sales_share
+        sql: "{nts_sales} / NULLIF({sum_of_segment_sales}, 0)"
+        type: number
+        format: percent
+        title: New-to-SKU Sales Share
+
+      - name: repeat_sales_share
+        sql: "{repeat_sales} / NULLIF({sum_of_segment_sales}, 0)"
+        type: number
+        format: percent
+
+      - name: reactive_sales_share
+        sql: "{reactive_sales} / NULLIF({sum_of_segment_sales}, 0)"
+        type: number
+        format: percent
