@@ -60,3 +60,19 @@ cubes:
         sql: "{CUBE.sales} / NULLIF({CUBE.customers}, 0)"
         type: number
         format: currency
+
+    pre_aggregations:
+      - name: by_campaign_segment
+        measures:
+          - CUBE.sales
+          - CUBE.orders
+          - CUBE.units
+          - CUBE.customers
+        dimensions:
+          - CUBE.period_type
+          - CUBE.customer_type
+          - campaigns.campaign_name
+          - campaigns.campaign_type
+          - campaigns.category
+        refresh_key:
+          every: 1 hour
