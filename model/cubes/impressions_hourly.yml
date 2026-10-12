@@ -1,0 +1,119 @@
+cubes:
+  - name: impressions_hourly
+    sql_table: marketing_raw.fact_impressions_hourly
+    description: >
+      Synthetic ad impressions at hourly grain across campaign, channel,
+      placement, country and device. ~52M rows over 2022-2023. Used to
+      benchmark Cube pre-aggregation performance vs raw BigQuery scans.
+    public: false
+
+    joins:
+      - name: campaigns
+        sql: "{CUBE}.campaign_id = {campaigns}.campaign_id"
+        relationship: many_to_one
+
+    dimensions:
+      - name: campaign_id
+        sql: campaign_id
+        type: string
+
+      - name: channel
+        sql: channel
+        type: string
+
+      - name: placement_type
+        sql: placement_type
+        type: string
+
+      - name: country
+        sql: country
+        type: string
+
+      - name: device
+        sql: device
+        type: string
+
+      - name: impression_hour
+        sql: impression_hour
+        type: number
+
+      - name: impression_date
+        sql: impression_date
+        type: time
+
+      - name: impression_timestamp
+        sql: "TIMESTAMP(DATETIME(impression_date, TIME(impression_hour, 0, 0)))"
+        type: time
+        description: Full hour-grain timestamp derived from impression_date + impression_hour.
+
+    measures:
+      - name: row_count
+        type: count
+        drill_members: [campaign_id, channel, placement_type, impression_date, country, device]
+
+      - name: impressions
+        sql: impressions
+        type: sum
+
+      - name: clicks
+        sql: clicks
+        type: sum
+
+      - name: spend
+        sql: spend_usd
+        type: sum
+        format: currency
+
+      - name: conversions
+        sql: conversions
+        type: sum
+
+      - name: revenue
+        sql: revenue_usd
+        type: sum
+        format: currency
+
+      - name: ctr
+        sql: "SAFE_DIVIDE({CUBE.clicks}, {CUBE.impressions})"
+        type: number
+        format: percent
+
+      - name: cpc
+        sql: "SAFE_DIVIDE({CUBE.spend}, {CUBE.clicks})"
+        type: number
+        format: currency
+
+      - name: cpa
+        sql: "SAFE_DIVIDE({CUBE.spend}, {CUBE.conversions})"
+        type: number
+        format: currency
+
+      - name: roas
+        sql: "SAFE_DIVIDE({CUBE.revenue}, {CUBE.spend})"
+        type: number
+
+    pre_aggregations:
+      # Daily rollup over all slicing dimensions. Collapses hour -> day
+      # (24x reduction) and all measures are additive so Cube can also
+      # answer by week/month/quarter/year from this rollup.
+      - name: daily_full
+        measures:
+          - CUBE.impressions
+          - CUBE.clicks
+          - CUBE.spend
+          - CUBE.conversions
+          - CUBE.revenue
+        dimensions:
+          - CUBE.campaign_id
+          - CUBE.channel
+          - CUBE.placement_type
+          - CUBE.country
+          - CUBE.device
+          - campaigns.category
+          - campaigns.campaign_type
+          - campaigns.campaign_name
+        time_dimension: CUBE.impression_date
+        granularity: day
+        partition_granularity: month
+        refresh_key:
+          every: 1 hour

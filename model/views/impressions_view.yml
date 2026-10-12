@@ -1,0 +1,38 @@
+views:
+  - name: impressions_view
+    title: Impressions (Hourly)
+    description: >
+      Impressions, clicks, spend, conversions and revenue by campaign, channel,
+      placement, country and device at hourly or daily grain. Backed by a daily
+      Cube Store rollup for sub-second response on dashboard queries.
+
+    cubes:
+      - join_path: impressions_hourly
+        includes:
+          - impression_date
+          - impression_timestamp
+          - impression_hour
+          - campaign_id
+          - channel
+          - placement_type
+          - country
+          - device
+          - row_count
+          - impressions
+          - clicks
+          - spend
+          - conversions
+          - revenue
+          - ctr
+          - cpc
+          - cpa
+          - roas
+
+      - join_path: impressions_hourly.campaigns
+        prefix: true
+        includes:
+          - campaign_name
+          - campaign_type
+          - category
+          - campaign_start_date
+          - campaign_end_date
