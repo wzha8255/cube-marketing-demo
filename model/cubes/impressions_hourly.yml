@@ -92,22 +92,22 @@ cubes:
         format: currency
 
       - name: ctr
-        sql: "SAFE_DIVIDE({CUBE.clicks}, {CUBE.impressions})"
+        sql: "1.0 * {CUBE.clicks} / NULLIF({CUBE.impressions}, 0)"
         type: number
         format: percent
 
       - name: cpc
-        sql: "SAFE_DIVIDE({CUBE.spend}, {CUBE.clicks})"
+        sql: "1.0 * {CUBE.spend} / NULLIF({CUBE.clicks}, 0)"
         type: number
         format: currency
 
       - name: cpa
-        sql: "SAFE_DIVIDE({CUBE.spend}, {CUBE.conversions})"
+        sql: "1.0 * {CUBE.spend} / NULLIF({CUBE.conversions}, 0)"
         type: number
         format: currency
 
       - name: roas
-        sql: "SAFE_DIVIDE({CUBE.revenue}, {CUBE.spend})"
+        sql: "1.0 * {CUBE.revenue} / NULLIF({CUBE.spend}, 0)"
         type: number
 
     pre_aggregations:
