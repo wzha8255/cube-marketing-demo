@@ -1,0 +1,55 @@
+views:
+  - name: campaign_overview_view
+    title: Campaign Overview
+    description: >
+      Combined view across campaign dimensions, sales metrics (per period and
+      customer type) and customer segment metrics (per period). Use this view
+      when you want to see sales performance and customer segmentation
+      side-by-side. Note that sales_period_type and customer_period_type come
+      from two different fact tables - filter the one that matches the measure
+      you are querying.
+
+    cubes:
+      - join_path: campaigns
+        includes:
+          - campaign_name
+          - campaign_type
+          - category
+          - campaign_start_date
+          - campaign_end_date
+          - campaign_duration_days
+          - count
+
+      - join_path: campaigns.campaign_sales_metrics
+        includes:
+          - name: period_type
+            alias: sales_period_type
+          - customer_type
+          - name: orders
+            alias: sales_orders
+          - name: customers
+            alias: sales_customers_rowcount
+          - name: units
+            alias: sales_units
+          - sales
+          - avg_order_value
+          - avg_revenue_per_customer
+
+      - join_path: campaigns.campaign_customer_metrics
+        includes:
+          - name: period_type
+            alias: customer_period_type
+          - total_customers
+          - total_orders
+          - total_sales
+          - ntb_customers
+          - ntb_sales
+          - nts_customers
+          - repeat_customers
+          - reactive_customers
+          - ntb_customer_share
+          - nts_customer_share
+          - repeat_customer_share
+          - reactive_customer_share
+          - ntb_sales_share
+          - nts_sales_share
